@@ -2,13 +2,13 @@
 
 `TLS` is the engine-neutral TLS session and peer-policy surface for the Swift Foundations ecosystem.
 
-`TLS.Configuration` carries the selected DNS query, DNS hostname, and `TLS.PeerPolicy`. An engine must use that hostname for both handshake identity and peer authentication, then return a `TLS.Session` with async read, write, and close.
+`TLS.Peer.Identity` is the sole relation binding a `DNS.Query` to the hostname used for both Server Name Indication and certificate authentication. `TLS.Configuration` carries that identity and `TLS.PeerPolicy`; resolution projects `identity.query`, authentication projects `identity.hostname`, and no independently variable query/hostname pair exists on the configuration.
 
 TLS reuses the provider-neutral `Domain Name System` product at `930ab8b5dadc99d6c44b101d92422545b697db7d` for `DNS.Query`, `DNS.Response`, `DNS.Resolver`, and `DNS.Resolving`. It does not depend on or import the separate `Domain Name System Cache` product. Because SwiftPM resolves a package's complete dependency declaration, the DNS package's Cache Primitives dependency remains in package-wide resolution even though it is absent from the TLS target's product and import closure.
 
 Consumers that need `TLS.Engine.Witness` without selecting a platform engine import the `TLS Engine Interface` library product. The witness consumes `Byte.Channel<TLS.Failure>` encrypted transport and yields an authenticated plaintext session. It preserves handshake, peer-policy, record, truncation, close, and typed-failure behavior without selecting a socket or provider.
 
-The interface reuses the frozen Byte Channel producer at `dfc56d1ed173aae4db784018c746050cbfbe4ee7`, including its public `Byte.Channel.capacity` surface and nonthrowing, ownership-preserving `Byte.Channel.Writer.Send.Outcome`; TLS does not call `Writer.send` directly and does not add a capacity policy or terminal adapter. This producer revision changes only its manifest and README from `0a7c65b4f12790337ff323e956e5adb691b92549`, freezing Async Primitives at `dbfcf6a3c61e72fe98580a7ef1f5384c59898cc4` and Buffer Linear Primitives at `3eead6eb2b440d417338929c60da94cc18fd3386`; its Byte Channel source and public API are unchanged.
+The interface reuses the frozen Byte Channel producer at `dfc56d1ed173aae4db784018c746050cbfbe4ee7`, including its owned `Byte.Chunk` and typed `Index<Byte>.Count` surface. A session read returns `nil` only for authenticated `close_notify`; premature physical or channel EOF is `.truncated`. A zero maximum returns an owned empty chunk without transport I/O, while a positive maximum cannot return an empty progressless chunk. Writes borrow the caller's chunk, retaining caller ownership on success and failure.
 
 The `TLS Apple Engine`, `TLS OpenSSL Engine`, and `TLS SChannel Engine` products are leaves. Each exposes an injected `TLS.Engine.Witness` that consumes the transport-neutral byte channel, authenticates the configured peer, and produces the session. They deliberately do not add cryptography, provider policy, pooling, Foundation, or platform imports to the core target. Socket binding remains a downstream composition concern.
 

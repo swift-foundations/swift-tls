@@ -20,12 +20,14 @@ let package = Package(
         .package(url: "https://github.com/swift-foundations/swift-ip-address.git", branch: "main"),
         .package(
             url: "https://github.com/swift-foundations/swift-certificate-verification.git",
-            revision: "9116d44e9380864e79dbfe2d6297fbc6e17209e1"
+            revision: "59b14b94e71daa6cc9cc250c8c553f254489073d"
         ),
         .package(
             url: "https://github.com/swift-foundations/swift-byte-channel.git",
             revision: "dfc56d1ed173aae4db784018c746050cbfbe4ee7"
         ),
+        .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-index-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-span-primitives.git", branch: "main"),
     ],
     targets: [
@@ -33,6 +35,9 @@ let package = Package(
             .product(name: "Domain Name System", package: "swift-domain-name-system"),
             .product(name: "IP Address", package: "swift-ip-address"),
             .product(name: "Certificates", package: "swift-certificate-verification"),
+            .product(name: "Byte Chunk", package: "swift-byte-channel"),
+            .product(name: "Byte Primitives", package: "swift-byte-primitives"),
+            .product(name: "Index Primitives", package: "swift-index-primitives"),
             .product(name: "Span Raw Primitives", package: "swift-span-primitives"),
         ]),
         .target(name: "TLS Engine Interface", dependencies: [

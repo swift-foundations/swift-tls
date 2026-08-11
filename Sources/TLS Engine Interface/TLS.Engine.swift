@@ -53,7 +53,7 @@ extension TLS.Engine {
         public func wrap(encrypted: consuming Byte.Channel<TLS.Failure>, configuration: TLS.Configuration) async throws(TLS.Failure) -> TLS.Session {
             let (session, peer) = try await handshake(consume encrypted, configuration)
             do throws(TLS.Failure) {
-                try await configuration.peer.authenticate(peer, configuration.hostname)
+                try await configuration.peer.authenticate(peer, configuration.identity.hostname)
                 return session
             } catch let failure as TLS.Failure {
                 await session.close()
