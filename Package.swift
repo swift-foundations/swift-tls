@@ -13,7 +13,10 @@ let package = Package(
         .library(name: "TLS SChannel Engine", targets: ["TLS SChannel Engine"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-foundations/swift-domain-name-system.git", revision: "4bd74b5"),
+        .package(
+            url: "https://github.com/swift-foundations/swift-domain-name-system.git",
+            revision: "930ab8b5dadc99d6c44b101d92422545b697db7d"
+        ),
         .package(url: "https://github.com/swift-foundations/swift-ip-address.git", branch: "main"),
         .package(url: "https://github.com/swift-foundations/swift-certificate-verification.git", revision: "1b4fc68"),
         .package(
