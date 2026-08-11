@@ -28,3 +28,36 @@ let finishedAfterCloseNotify = TLS.Failure.terminal(.finished, authenticatedClos
 let closedWithoutCloseNotify = TLS.Failure.terminal(.closed, authenticatedCloseNotify: false)
 let defensiveFullTerminal = TLS.Failure.terminal(.full, authenticatedCloseNotify: false)
 let defensiveEmptyTerminal = TLS.Failure.terminal(.empty, authenticatedCloseNotify: false)
+
+// Ownership source laws: Session is storable and returnable, but operations borrow its unique
+// value and close consumes it. Its required synchronous drop hook is distinct from async close.
+struct SessionOwner: ~Copyable {
+    var session: TLS.Session
+}
+
+func read(session: borrowing TLS.Session, maximum: Int) async throws(TLS.Failure) -> [UInt8] {
+    try await session.read(maximum: maximum)
+}
+
+func write(session: borrowing TLS.Session, bytes: [UInt8]) async throws(TLS.Failure) {
+    try await session.write(bytes)
+}
+
+func close(session: consuming TLS.Session) async {
+    await session.close()
+}
+
+func session(
+    close: @escaping @Sendable () async -> Void,
+    drop: @escaping @Sendable () -> Void
+) -> TLS.Session {
+    TLS.Session(
+        read: { _ in [] },
+        write: { _ in },
+        close: close,
+        drop: drop
+    )
+}
+
+// Authentication source law: Witness.wrap owns the post-handshake Session. Its typed failure
+// branch awaits consuming close before rethrowing the unchanged TLS.Failure.

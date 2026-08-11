@@ -52,8 +52,13 @@ extension TLS.Engine {
         /// Handshakes the encrypted channel, then authenticates its certificate peer for the configured DNS hostname.
         public func wrap(encrypted: consuming Byte.Channel<TLS.Failure>, configuration: TLS.Configuration) async throws(TLS.Failure) -> TLS.Session {
             let (session, peer) = try await handshake(consume encrypted, configuration)
-            try await configuration.peer.authenticate(peer, configuration.hostname)
-            return session
+            do throws(TLS.Failure) {
+                try await configuration.peer.authenticate(peer, configuration.hostname)
+                return session
+            } catch let failure as TLS.Failure {
+                await session.close()
+                throw failure
+            }
         }
     }
 }

@@ -18,7 +18,10 @@ let package = Package(
             revision: "930ab8b5dadc99d6c44b101d92422545b697db7d"
         ),
         .package(url: "https://github.com/swift-foundations/swift-ip-address.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-certificate-verification.git", revision: "1b4fc68"),
+        .package(
+            url: "https://github.com/swift-foundations/swift-certificate-verification.git",
+            revision: "9116d44e9380864e79dbfe2d6297fbc6e17209e1"
+        ),
         .package(
             url: "https://github.com/swift-foundations/swift-byte-channel.git",
             revision: "dfc56d1ed173aae4db784018c746050cbfbe4ee7"
