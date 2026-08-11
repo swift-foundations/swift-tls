@@ -2,11 +2,11 @@
 
 `TLS` is the engine-neutral TLS session and peer-policy surface for the Swift Foundations ecosystem.
 
-`TLS.Configuration` carries the selected DNS query, DNS hostname, and `TLS.PeerPolicy`. An engine must use that hostname for both handshake identity and peer authentication, then return a `TLS.Session`. The session is the only transport handed to HTTP and PostgreSQL providers: async read, write, and close.
+`TLS.Configuration` carries the selected DNS query, DNS hostname, and `TLS.PeerPolicy`. An engine must use that hostname for both handshake identity and peer authentication, then return a `TLS.Session` with async read, write, and close.
 
-Consumers that need `TLS.Engine.Witness` without selecting a platform engine import the `TLS Engine Interface` library product.
+Consumers that need `TLS.Engine.Witness` without selecting a platform engine import the `TLS Engine Interface` library product. The witness consumes `Byte.Channel<TLS.Failure>` encrypted transport and yields an authenticated plaintext session. It preserves handshake, peer-policy, record, truncation, close, and typed-failure behavior without selecting a socket or provider.
 
-The `TLS Apple Engine`, `TLS OpenSSL Engine`, and `TLS SChannel Engine` products are leaves. Each exposes an injected `TLS.Engine.Witness` that consumes a `Sockets.TCP.Connection`, authenticates the configured peer, and produces the session. They deliberately do not add cryptography, provider policy, HTTP policy, pooling, Foundation, or platform imports to the core target.
+The `TLS Apple Engine`, `TLS OpenSSL Engine`, and `TLS SChannel Engine` products are leaves. Each exposes an injected `TLS.Engine.Witness` that consumes the transport-neutral byte channel, authenticates the configured peer, and produces the session. They deliberately do not add cryptography, provider policy, pooling, Foundation, or platform imports to the core target. Socket binding remains a downstream integration concern because the concurrent Sockets source does not yet expose the approved Byte Channel contract.
 
 ## Current engine blockers
 

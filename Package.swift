@@ -16,8 +16,10 @@ let package = Package(
         .package(url: "https://github.com/swift-foundations/swift-domain-name-system.git", revision: "4bd74b5"),
         .package(url: "https://github.com/swift-foundations/swift-ip-address.git", branch: "main"),
         .package(url: "https://github.com/swift-foundations/swift-certificate-verification.git", revision: "1b4fc68"),
-        .package(url: "https://github.com/swift-foundations/swift-io.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-sockets.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-foundations/swift-byte-channel.git",
+            revision: "d2bed89fb434962fe055351e0d6dfaaf5e2a1d68"
+        ),
         .package(url: "https://github.com/swift-primitives/swift-span-primitives.git", branch: "main"),
     ],
     targets: [
@@ -25,15 +27,22 @@ let package = Package(
             .product(name: "Domain Name System", package: "swift-domain-name-system"),
             .product(name: "IP Address", package: "swift-ip-address"),
             .product(name: "Certificates", package: "swift-certificate-verification"),
-            .product(name: "IO", package: "swift-io"),
-            .product(name: "Sockets", package: "swift-sockets"),
             .product(name: "Span Raw Primitives", package: "swift-span-primitives"),
         ]),
-        .target(name: "TLS Engine Interface", dependencies: ["TLS", .product(name: "Sockets", package: "swift-sockets")]),
+        .target(name: "TLS Engine Interface", dependencies: [
+            "TLS",
+            .product(name: "Byte Channel", package: "swift-byte-channel"),
+        ]),
         .target(name: "TLS Apple Engine", dependencies: ["TLS Engine Interface"]),
         .target(name: "TLS OpenSSL Engine", dependencies: ["TLS Engine Interface"]),
         .target(name: "TLS SChannel Engine", dependencies: ["TLS Engine Interface"]),
-        .testTarget(name: "TLS Contract Tests", dependencies: ["TLS", "TLS Apple Engine", "TLS OpenSSL Engine", "TLS SChannel Engine"]),
+        .testTarget(name: "TLS Contract Tests", dependencies: [
+            "TLS",
+            "TLS Engine Interface",
+            "TLS Apple Engine",
+            "TLS OpenSSL Engine",
+            "TLS SChannel Engine",
+        ]),
     ],
     swiftLanguageModes: [.v6]
 )
