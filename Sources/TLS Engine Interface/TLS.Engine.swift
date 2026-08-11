@@ -1,9 +1,39 @@
 public import Byte_Channel
 public import TLS
 
+// Static negative control: the engine-neutral interface remains transport-neutral.
+#if canImport(Sockets)
+    #error("TLS Engine Interface must not depend on Sockets")
+#endif
+
 extension TLS {
     /// TLS engine integration namespace; concrete engines are leaf products.
     public enum Engine {}
+}
+
+extension TLS.Failure {
+    /// Maps an encrypted byte-channel terminal outcome into the TLS session failure domain.
+    ///
+    /// `nil` represents EOF from `Byte.Channel.Reader.receive()`. EOF, `.finished`, and
+    /// `.closed` are a clean TLS close only after the engine authenticated `close_notify`;
+    /// otherwise they are truncation. A declared channel failure is preserved exactly, and
+    /// cancellation remains cancellation. Awaited channel operations cannot produce `.full`
+    /// or `.empty`; these cases remain defensively typed as `.transport`.
+    public static func terminal(
+        _ channel: Byte.Channel<TLS.Failure>.Error?,
+        authenticatedCloseNotify: Bool
+    ) -> TLS.Failure {
+        switch channel {
+        case .some(.failed(let failure)):
+            return failure
+        case .some(.cancelled):
+            return .cancelled
+        case .none, .some(.finished), .some(.closed):
+            return authenticatedCloseNotify ? .closed : .truncated
+        case .some(.full), .some(.empty):
+            return .transport
+        }
+    }
 }
 
 extension TLS.Engine {

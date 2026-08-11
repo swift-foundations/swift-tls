@@ -28,7 +28,9 @@ extension TLS {
             try await writeOperation(bytes)
         }
 
-        /// Closes the encrypted session and its underlying byte connection.
+        /// Closes this TLS and byte-channel session.
+        ///
+        /// A downstream composer owns closing any physical transport.
         public func close() async {
             await closeOperation()
         }

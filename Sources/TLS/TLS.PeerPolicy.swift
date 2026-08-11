@@ -21,11 +21,13 @@ extension TLS {
         }
     }
 
-    /// Session lifecycle failure, including cancellation and peer rejection.
+    /// Session lifecycle failure, including cancellation, peer rejection, and terminal transport state.
     public enum Failure: Swift.Error, Sendable {
         case cancelled
         case handshake
         case peer
+        /// The encrypted stream ended before an authenticated TLS `close_notify` alert.
+        case truncated
         case closed
         case transport
     }
