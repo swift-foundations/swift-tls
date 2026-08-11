@@ -6,6 +6,8 @@
 
 Consumers that need `TLS.Engine.Witness` without selecting a platform engine import the `TLS Engine Interface` library product. The witness consumes `Byte.Channel<TLS.Failure>` encrypted transport and yields an authenticated plaintext session. It preserves handshake, peer-policy, record, truncation, close, and typed-failure behavior without selecting a socket or provider.
 
+The interface reuses the frozen Byte Channel producer at `6a7eaf41b153f332ac2f144d105197c4b00c2a2e`, including its public `Byte.Channel.capacity` surface; TLS does not add a capacity policy.
+
 The `TLS Apple Engine`, `TLS OpenSSL Engine`, and `TLS SChannel Engine` products are leaves. Each exposes an injected `TLS.Engine.Witness` that consumes the transport-neutral byte channel, authenticates the configured peer, and produces the session. They deliberately do not add cryptography, provider policy, pooling, Foundation, or platform imports to the core target. Socket binding remains a downstream composition concern.
 
 An engine maps encrypted-channel termination into `TLS.Failure`: a declared failure is preserved exactly and cancellation remains cancellation. EOF, `.finished`, and `.closed` become `.closed` only after an authenticated TLS `close_notify`; otherwise they become `.truncated`. Awaited `.full` and `.empty` are unreachable and are defensively represented as `.transport`.

@@ -18,7 +18,7 @@ let package = Package(
         .package(url: "https://github.com/swift-foundations/swift-certificate-verification.git", revision: "1b4fc68"),
         .package(
             url: "https://github.com/swift-foundations/swift-byte-channel.git",
-            revision: "f56b4393496fd52fffd1f27bfffca3b101a992d2"
+            revision: "6a7eaf41b153f332ac2f144d105197c4b00c2a2e"
         ),
         .package(url: "https://github.com/swift-primitives/swift-span-primitives.git", branch: "main"),
     ],
