@@ -6,7 +6,7 @@
 
 Consumers that need `TLS.Engine.Witness` without selecting a platform engine import the `TLS Engine Interface` library product. The witness consumes `Byte.Channel<TLS.Failure>` encrypted transport and yields an authenticated plaintext session. It preserves handshake, peer-policy, record, truncation, close, and typed-failure behavior without selecting a socket or provider.
 
-The interface reuses the frozen Byte Channel producer at `0a7c65b4f12790337ff323e956e5adb691b92549`, including its public `Byte.Channel.capacity` surface and nonthrowing, ownership-preserving `Byte.Channel.Writer.Send.Outcome`; TLS does not call `Writer.send` directly and does not add a capacity policy or terminal adapter.
+The interface reuses the frozen Byte Channel producer at `dfc56d1ed173aae4db784018c746050cbfbe4ee7`, including its public `Byte.Channel.capacity` surface and nonthrowing, ownership-preserving `Byte.Channel.Writer.Send.Outcome`; TLS does not call `Writer.send` directly and does not add a capacity policy or terminal adapter. This producer revision changes only its manifest and README from `0a7c65b4f12790337ff323e956e5adb691b92549`, freezing Async Primitives at `dbfcf6a3c61e72fe98580a7ef1f5384c59898cc4` and Buffer Linear Primitives at `3eead6eb2b440d417338929c60da94cc18fd3386`; its Byte Channel source and public API are unchanged.
 
 The `TLS Apple Engine`, `TLS OpenSSL Engine`, and `TLS SChannel Engine` products are leaves. Each exposes an injected `TLS.Engine.Witness` that consumes the transport-neutral byte channel, authenticates the configured peer, and produces the session. They deliberately do not add cryptography, provider policy, pooling, Foundation, or platform imports to the core target. Socket binding remains a downstream composition concern.
 
