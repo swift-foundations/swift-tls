@@ -4,6 +4,8 @@
 
 `TLS.Configuration` carries the selected DNS query, DNS hostname, and `TLS.PeerPolicy`. An engine must use that hostname for both handshake identity and peer authentication, then return a `TLS.Session`. The session is the only transport handed to HTTP and PostgreSQL providers: async read, write, and close.
 
+Consumers that need `TLS.Engine.Witness` without selecting a platform engine import the `TLS Engine Interface` library product.
+
 The `TLS Apple Engine`, `TLS OpenSSL Engine`, and `TLS SChannel Engine` products are leaves. Each exposes an injected `TLS.Engine.Witness` that consumes a `Sockets.TCP.Connection`, authenticates the configured peer, and produces the session. They deliberately do not add cryptography, provider policy, HTTP policy, pooling, Foundation, or platform imports to the core target.
 
 ## Current engine blockers

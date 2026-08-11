@@ -7,6 +7,7 @@ let package = Package(
     platforms: [.macOS(.v26), .iOS(.v26), .tvOS(.v26), .watchOS(.v26), .visionOS(.v26)],
     products: [
         .library(name: "TLS", targets: ["TLS"]),
+        .library(name: "TLS Engine Interface", targets: ["TLS Engine Interface"]),
         .library(name: "TLS Apple Engine", targets: ["TLS Apple Engine"]),
         .library(name: "TLS OpenSSL Engine", targets: ["TLS OpenSSL Engine"]),
         .library(name: "TLS SChannel Engine", targets: ["TLS SChannel Engine"]),
