@@ -43,14 +43,18 @@ extension TLS.Engine {
         ///
         /// The implementation preserves handshake, record, truncation, and close outcomes through
         /// `TLS.Failure`; it does not select an endpoint, scheduler, or cryptographic implementation.
-        public let handshake: @Sendable (consuming Byte.Channel<TLS.Failure>, TLS.Configuration) async throws(TLS.Failure) -> (TLS.Session, TLS.Peer)
+        // swift-linter:disable:next sendable sharing requirement
+        // REASON: CATEGORY: actor-independent-reuse; SHARING: one witness may create independent sessions concurrently for multiple connections.
+        public let handshake: @Sendable (consuming Byte.Channel<TLS.Failure>, TLS.Configuration) async throws(TLS.Failure) -> sending (TLS.Session, TLS.Peer)
 
-        public init(handshake: @escaping @Sendable (consuming Byte.Channel<TLS.Failure>, TLS.Configuration) async throws(TLS.Failure) -> (TLS.Session, TLS.Peer)) {
+        // swift-linter:disable:next sendable sharing requirement
+        // REASON: CATEGORY: actor-independent-reuse; SHARING: the transferred factory is retained for independently concurrent connection creation.
+        public init(handshake: @escaping @Sendable (consuming Byte.Channel<TLS.Failure>, TLS.Configuration) async throws(TLS.Failure) -> sending (TLS.Session, TLS.Peer)) {
             self.handshake = handshake
         }
 
         /// Handshakes the encrypted channel, then authenticates its certificate peer for the configured DNS hostname.
-        public func wrap(encrypted: consuming Byte.Channel<TLS.Failure>, configuration: TLS.Configuration) async throws(TLS.Failure) -> TLS.Session {
+        public func wrap(encrypted: consuming Byte.Channel<TLS.Failure>, configuration: TLS.Configuration) async throws(TLS.Failure) -> sending TLS.Session {
             let (session, peer) = try await handshake(consume encrypted, configuration)
             do throws(TLS.Failure) {
                 try await configuration.peer.authenticate(peer, configuration.identity.hostname)

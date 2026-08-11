@@ -52,8 +52,8 @@ func close(session: consuming TLS.Session) async {
 }
 
 func session(
-    close: @escaping @Sendable () async -> Void,
-    drop: @escaping @Sendable () -> Void
+    close: sending @escaping () async -> Void,
+    drop: sending @escaping () -> Void
 ) -> TLS.Session {
     TLS.Session(
         read: { _ in Byte.Chunk.Input(capacity: .zero).finish() },
@@ -61,6 +61,30 @@ func session(
         close: close,
         drop: drop
     )
+}
+
+// Region-transfer source law: Session is deliberately non-Sendable. Its unique value and
+// non-Sendable stored operations cross into one actor only through consuming+sending transfer.
+// The actor then borrows that owned session for operations and consumes it exactly once to close.
+actor SessionRegion {
+    func own(
+        _ session: consuming sending TLS.Session,
+        maximum: Index<Byte>.Count
+    ) async throws(TLS.Failure) {
+        if let plaintext = try await session.read(maximum: maximum) {
+            let count = plaintext.count
+            _ = count
+        }
+        await session.close()
+    }
+}
+
+func transfer(
+    _ session: consuming sending TLS.Session,
+    to region: SessionRegion,
+    maximum: Index<Byte>.Count
+) async throws(TLS.Failure) {
+    try await region.own(consume session, maximum: maximum)
 }
 
 // Identity non-divergence source law: Configuration accepts only the relation owner, never an
@@ -113,6 +137,9 @@ func writeRetainsOnFailure(
 // Close/drop law: consuming close clears the guarded hook before awaiting it; dropping an
 // unclosed session invokes only the synchronous drop hook. No span borrow appears in an async
 // operation, so no lifetime-bound view can cross suspension.
+// Stored-operation law: Session initializer parameters are sending escaping closures moved into
+// one unique session region. They are not @Sendable because no independently concurrent owner
+// may retain or reuse them. The move-only Session has no Sendable conformance and no aliasing shim.
 // Authentication law: Witness.wrap owns the post-handshake Session. Its typed failure branch
 // awaits consuming close before rethrowing the unchanged TLS.Failure.
 

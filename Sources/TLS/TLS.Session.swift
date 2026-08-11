@@ -8,17 +8,17 @@ extension TLS {
     /// The session has unique ownership. Borrow it to read or write, and consume it to perform
     /// the asynchronous TLS close exactly once. Dropping an unclosed session synchronously
     /// cancels its engine state; asynchronous protocol cleanup requires an explicit `close()`.
-    public struct Session: ~Copyable, Sendable {
-        private let readOperation: @Sendable (Index<Byte>.Count) async throws(TLS.Failure) -> sending Byte.Chunk?
-        private let writeOperation: @Sendable (borrowing Byte.Chunk) async throws(TLS.Failure) -> Void
-        private var closeOperation: (@Sendable () async -> Void)?
-        private let dropOperation: @Sendable () -> Void
+    public struct Session: ~Copyable {
+        private let readOperation: (Index<Byte>.Count) async throws(TLS.Failure) -> sending Byte.Chunk?
+        private let writeOperation: (borrowing Byte.Chunk) async throws(TLS.Failure) -> Void
+        private var closeOperation: (() async -> Void)?
+        private let dropOperation: () -> Void
 
         public init(
-            read: @escaping @Sendable (Index<Byte>.Count) async throws(TLS.Failure) -> sending Byte.Chunk?,
-            write: @escaping @Sendable (borrowing Byte.Chunk) async throws(TLS.Failure) -> Void,
-            close: @escaping @Sendable () async -> Void,
-            drop: @escaping @Sendable () -> Void
+            read: sending @escaping (Index<Byte>.Count) async throws(TLS.Failure) -> sending Byte.Chunk?,
+            write: sending @escaping (borrowing Byte.Chunk) async throws(TLS.Failure) -> Void,
+            close: sending @escaping () async -> Void,
+            drop: sending @escaping () -> Void
         ) {
             self.readOperation = read
             self.writeOperation = write
