@@ -1,25 +1,68 @@
-public import Sockets
+public import Byte_Channel
 public import TLS
+
+// Static negative control: the engine-neutral interface remains transport-neutral.
+#if canImport(Sockets)
+    #error("TLS Engine Interface must not depend on Sockets")
+#endif
 
 extension TLS {
     /// TLS engine integration namespace; concrete engines are leaf products.
     public enum Engine {}
 }
 
-extension TLS.Engine {
-    /// An injected engine adapter that consumes a socket byte connection and yields an authenticated session.
-    public struct Witness: Sendable {
-        public let handshake: @Sendable (consuming Sockets.TCP.Connection, TLS.Configuration) async throws(TLS.Failure) -> (TLS.Session, TLS.Peer)
+extension TLS.Failure {
+    /// Maps an encrypted byte-channel terminal outcome into the TLS session failure domain.
+    ///
+    /// `nil` represents EOF from `Byte.Channel.Reader.receive()`. EOF, `.finished`, and
+    /// `.closed` are a clean TLS close only after the engine authenticated `close_notify`;
+    /// otherwise they are truncation. A declared channel failure is preserved exactly, and
+    /// cancellation remains cancellation. Awaited channel operations cannot produce `.full`
+    /// or `.empty`; these cases remain defensively typed as `.transport`.
+    public static func terminal(
+        _ channel: Byte.Channel<TLS.Failure>.Error?,
+        authenticatedCloseNotify: Bool
+    ) -> TLS.Failure {
+        switch channel {
+        case .some(.failed(let failure)):
+            return failure
+        case .some(.cancelled):
+            return .cancelled
+        case .none, .some(.finished), .some(.closed):
+            return authenticatedCloseNotify ? .closed : .truncated
+        case .some(.full), .some(.empty):
+            return .transport
+        }
+    }
+}
 
-        public init(handshake: @escaping @Sendable (consuming Sockets.TCP.Connection, TLS.Configuration) async throws(TLS.Failure) -> (TLS.Session, TLS.Peer)) {
+extension TLS.Engine {
+    /// An injected engine adapter that transforms an encrypted byte channel into an authenticated session.
+    public struct Witness: Sendable {
+        /// The engine receives encrypted bytes and returns their authenticated plaintext session.
+        ///
+        /// The implementation preserves handshake, record, truncation, and close outcomes through
+        /// `TLS.Failure`; it does not select an endpoint, scheduler, or cryptographic implementation.
+        // swift-linter:disable:next sendable sharing requirement
+        // REASON: CATEGORY: actor-independent-reuse; SHARING: one witness may create independent sessions concurrently for multiple connections.
+        public let handshake: @Sendable (consuming Byte.Channel<TLS.Failure>, TLS.Configuration) async throws(TLS.Failure) -> sending (TLS.Session, TLS.Peer)
+
+        // swift-linter:disable:next sendable sharing requirement
+        // REASON: CATEGORY: actor-independent-reuse; SHARING: the transferred factory is retained for independently concurrent connection creation.
+        public init(handshake: @escaping @Sendable (consuming Byte.Channel<TLS.Failure>, TLS.Configuration) async throws(TLS.Failure) -> sending (TLS.Session, TLS.Peer)) {
             self.handshake = handshake
         }
 
-        /// Handshakes, then authenticates the certificate peer for the configured DNS hostname.
-        public func wrap(socket: consuming Sockets.TCP.Connection, configuration: TLS.Configuration) async throws(TLS.Failure) -> TLS.Session {
-            let (session, peer) = try await handshake(consume socket, configuration)
-            try await configuration.peer.authenticate(peer, configuration.hostname)
-            return session
+        /// Handshakes the encrypted channel, then authenticates its certificate peer for the configured DNS hostname.
+        public func wrap(encrypted: consuming Byte.Channel<TLS.Failure>, configuration: TLS.Configuration) async throws(TLS.Failure) -> sending TLS.Session {
+            let (session, peer) = try await handshake(consume encrypted, configuration)
+            do throws(TLS.Failure) {
+                try await configuration.peer.authenticate(peer, configuration.identity.hostname)
+                return session
+            } catch let failure as TLS.Failure {
+                await session.close()
+                throw failure
+            }
         }
     }
 }

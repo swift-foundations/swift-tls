@@ -7,16 +7,27 @@ let package = Package(
     platforms: [.macOS(.v26), .iOS(.v26), .tvOS(.v26), .watchOS(.v26), .visionOS(.v26)],
     products: [
         .library(name: "TLS", targets: ["TLS"]),
+        .library(name: "TLS Engine Interface", targets: ["TLS Engine Interface"]),
         .library(name: "TLS Apple Engine", targets: ["TLS Apple Engine"]),
         .library(name: "TLS OpenSSL Engine", targets: ["TLS OpenSSL Engine"]),
         .library(name: "TLS SChannel Engine", targets: ["TLS SChannel Engine"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-foundations/swift-domain-name-system.git", revision: "4bd74b5"),
+        .package(
+            url: "https://github.com/swift-foundations/swift-domain-name-system.git",
+            revision: "930ab8b5dadc99d6c44b101d92422545b697db7d"
+        ),
         .package(url: "https://github.com/swift-foundations/swift-ip-address.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-certificate-verification.git", revision: "1b4fc68"),
-        .package(url: "https://github.com/swift-foundations/swift-io.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-sockets.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-foundations/swift-certificate-verification.git",
+            revision: "59b14b94e71daa6cc9cc250c8c553f254489073d"
+        ),
+        .package(
+            url: "https://github.com/swift-foundations/swift-byte-channel.git",
+            revision: "dfc56d1ed173aae4db784018c746050cbfbe4ee7"
+        ),
+        .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-index-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-span-primitives.git", branch: "main"),
     ],
     targets: [
@@ -24,15 +35,25 @@ let package = Package(
             .product(name: "Domain Name System", package: "swift-domain-name-system"),
             .product(name: "IP Address", package: "swift-ip-address"),
             .product(name: "Certificates", package: "swift-certificate-verification"),
-            .product(name: "IO", package: "swift-io"),
-            .product(name: "Sockets", package: "swift-sockets"),
+            .product(name: "Byte Chunk", package: "swift-byte-channel"),
+            .product(name: "Byte Primitives", package: "swift-byte-primitives"),
+            .product(name: "Index Primitives", package: "swift-index-primitives"),
             .product(name: "Span Raw Primitives", package: "swift-span-primitives"),
         ]),
-        .target(name: "TLS Engine Interface", dependencies: ["TLS", .product(name: "Sockets", package: "swift-sockets")]),
+        .target(name: "TLS Engine Interface", dependencies: [
+            "TLS",
+            .product(name: "Byte Channel", package: "swift-byte-channel"),
+        ]),
         .target(name: "TLS Apple Engine", dependencies: ["TLS Engine Interface"]),
         .target(name: "TLS OpenSSL Engine", dependencies: ["TLS Engine Interface"]),
         .target(name: "TLS SChannel Engine", dependencies: ["TLS Engine Interface"]),
-        .testTarget(name: "TLS Contract Tests", dependencies: ["TLS", "TLS Apple Engine", "TLS OpenSSL Engine", "TLS SChannel Engine"]),
+        .testTarget(name: "TLS Contract Tests", dependencies: [
+            "TLS",
+            "TLS Engine Interface",
+            "TLS Apple Engine",
+            "TLS OpenSSL Engine",
+            "TLS SChannel Engine",
+        ]),
     ],
     swiftLanguageModes: [.v6]
 )
