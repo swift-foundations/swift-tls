@@ -1,3 +1,4 @@
+public import TLS
 public import TLS_Engine_Interface
 
 extension TLS.Engine {
