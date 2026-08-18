@@ -12,9 +12,9 @@ let package = Package(
         .library(name: "TLS SChannel Engine", targets: ["TLS SChannel Engine"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-foundations/swift-domain-name-system.git", revision: "4bd74b5"),
+        .package(url: "https://github.com/swift-foundations/swift-domain-name-system.git", branch: "main"),
         .package(url: "https://github.com/swift-foundations/swift-ip-address.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-certificate-verification.git", revision: "1b4fc68"),
+        .package(url: "https://github.com/swift-foundations/swift-certificate-verification.git", branch: "main"),
         .package(url: "https://github.com/swift-foundations/swift-io.git", branch: "main"),
         .package(url: "https://github.com/swift-foundations/swift-sockets.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-span-primitives.git", branch: "main"),
