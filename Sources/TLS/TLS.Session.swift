@@ -1,6 +1,6 @@
 extension TLS {
-    /// An authenticated encrypted byte session for HTTP and PostgreSQL transports.
     // SAFETY: The injected operations own their synchronization and remain valid only until close.
+    /// An authenticated encrypted byte session for HTTP and PostgreSQL transports.
     public final class Session: @unchecked Sendable {
         private let readOperation: @Sendable (Int) async throws(TLS.Failure) -> [UInt8]
         private let writeOperation: @Sendable ([UInt8]) async throws(TLS.Failure) -> Void

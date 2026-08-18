@@ -1,4 +1,4 @@
-public import DNS
+public import Domain_Name_System
 public import IP_Address
 
 extension TLS {
@@ -18,7 +18,9 @@ extension TLS {
         }
 
         /// Resolves the configured DNS question through the caller's cancellable resolver.
-        public func resolve<Resolver: DNS.Resolving>(using resolver: Resolver) async throws(Resolver.Failure) -> [IP.Address] {
+        public func resolve<Resolver: DNS.Resolving>(
+            using resolver: Resolver
+        ) async throws(Resolver.Failure) -> [IP.Address] {
             try await resolver.resolve(query)
         }
     }

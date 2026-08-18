@@ -4,9 +4,9 @@ extension TLS {
     /// A verified peer identity supplied by a TLS engine after handshake.
     public struct Peer: Sendable {
         /// The validated chain, ordered from leaf to trust anchor.
-        public let chain: Certificate.Chain
+        public let chain: ValidatedCertificateChain
 
-        public init(chain: Certificate.Chain) {
+        public init(chain: ValidatedCertificateChain) {
             self.chain = chain
         }
     }
@@ -16,7 +16,9 @@ extension TLS {
         /// Rejects a peer that is not authenticated for the configuration hostname.
         public let authenticate: @Sendable (TLS.Peer, String) async throws(TLS.Failure) -> Void
 
-        public init(authenticate: @escaping @Sendable (TLS.Peer, String) async throws(TLS.Failure) -> Void) {
+        public init(
+            authenticate: @escaping @Sendable (TLS.Peer, String) async throws(TLS.Failure) -> Void
+        ) {
             self.authenticate = authenticate
         }
     }
