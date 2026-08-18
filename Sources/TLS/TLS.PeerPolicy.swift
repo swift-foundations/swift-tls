@@ -16,7 +16,9 @@ extension TLS {
         /// Rejects a peer that is not authenticated for the configuration hostname.
         public let authenticate: @Sendable (TLS.Peer, String) async throws(TLS.Failure) -> Void
 
-        public init(authenticate: @escaping @Sendable (TLS.Peer, String) async throws(TLS.Failure) -> Void) {
+        public init(
+            authenticate: @escaping @Sendable (TLS.Peer, String) async throws(TLS.Failure) -> Void
+        ) {
             self.authenticate = authenticate
         }
     }
