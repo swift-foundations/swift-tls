@@ -4,9 +4,9 @@ extension TLS {
     /// A verified peer identity supplied by a TLS engine after handshake.
     public struct Peer: Sendable {
         /// The validated chain, ordered from leaf to trust anchor.
-        public let chain: Certificate.Chain
+        public let chain: ValidatedCertificateChain
 
-        public init(chain: Certificate.Chain) {
+        public init(chain: ValidatedCertificateChain) {
             self.chain = chain
         }
     }
