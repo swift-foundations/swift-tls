@@ -1,4 +1,4 @@
-public import DNS
+public import Domain_Name_System
 public import IP_Address
 
 extension TLS {
