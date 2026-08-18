@@ -29,9 +29,9 @@ let package = Package(
             .product(name: "Span Raw Primitives", package: "swift-span-primitives"),
         ]),
         .target(name: "TLS Engine Interface", dependencies: ["TLS", .product(name: "Sockets", package: "swift-sockets")]),
-        .target(name: "TLS Apple Engine", dependencies: ["TLS Engine Interface"]),
-        .target(name: "TLS OpenSSL Engine", dependencies: ["TLS Engine Interface"]),
-        .target(name: "TLS SChannel Engine", dependencies: ["TLS Engine Interface"]),
+        .target(name: "TLS Apple Engine", dependencies: ["TLS", "TLS Engine Interface"]),
+        .target(name: "TLS OpenSSL Engine", dependencies: ["TLS", "TLS Engine Interface"]),
+        .target(name: "TLS SChannel Engine", dependencies: ["TLS", "TLS Engine Interface"]),
         .testTarget(name: "TLS Contract Tests", dependencies: ["TLS", "TLS Apple Engine", "TLS OpenSSL Engine", "TLS SChannel Engine"]),
     ],
     swiftLanguageModes: [.v6]
