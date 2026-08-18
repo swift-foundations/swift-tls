@@ -10,14 +10,16 @@ extension TLS.Engine {
     /// An injected engine adapter that consumes a socket byte connection and yields an
     /// authenticated session.
     public struct Witness: Sendable {
-        public let handshake: @Sendable (
-            consuming Sockets.TCP.Connection, TLS.Configuration
-        ) async throws(TLS.Failure) -> (TLS.Session, TLS.Peer)
-
-        public init(
-            handshake: @escaping @Sendable (
+        public let handshake:
+            @Sendable (
                 consuming Sockets.TCP.Connection, TLS.Configuration
             ) async throws(TLS.Failure) -> (TLS.Session, TLS.Peer)
+
+        public init(
+            handshake:
+                @escaping @Sendable (
+                    consuming Sockets.TCP.Connection, TLS.Configuration
+                ) async throws(TLS.Failure) -> (TLS.Session, TLS.Peer)
         ) {
             self.handshake = handshake
         }
