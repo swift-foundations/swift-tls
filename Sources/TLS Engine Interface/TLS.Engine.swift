@@ -7,7 +7,8 @@ extension TLS {
 }
 
 extension TLS.Engine {
-    /// An injected engine adapter that consumes a socket byte connection and yields an authenticated session.
+    /// An injected engine adapter that consumes a socket byte connection and yields an
+    /// authenticated session.
     public struct Witness: Sendable {
         public let handshake: @Sendable (
             consuming Sockets.TCP.Connection, TLS.Configuration
