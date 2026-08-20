@@ -1,10 +1,10 @@
-// swift-tools-version: 6.3.3
+// swift-tools-version: 6.4
 
 import PackageDescription
 
 let package = Package(
     name: "swift-tls",
-    platforms: [.macOS("27"), .iOS("27"), .tvOS("27"), .watchOS("27"), .visionOS("27")],
+    platforms: [.macOS(.v27), .iOS(.v27), .tvOS(.v27), .watchOS(.v27), .visionOS(.v27)],
     products: [
         .library(name: "TLS", targets: ["TLS"]),
         .library(name: "TLS Apple Engine", targets: ["TLS Apple Engine"]),
@@ -12,41 +12,60 @@ let package = Package(
         .library(name: "TLS SChannel Engine", targets: ["TLS SChannel Engine"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-foundations/swift-domain-name-system.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-foundations/swift-domain-name-system.git",
+            branch: "main"
+        ),
         .package(url: "https://github.com/swift-foundations/swift-ip-address.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-certificate-verification.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-foundations/swift-certificate-verification.git",
+            branch: "main"
+        ),
         .package(url: "https://github.com/swift-foundations/swift-io.git", branch: "main"),
         .package(url: "https://github.com/swift-foundations/swift-sockets.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-span-primitives.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-primitives/swift-span-primitives.git",
+            branch: "main"
+        ),
     ],
     targets: [
-        .target(name: "TLS", dependencies: [
-            .product(name: "Domain Name System", package: "swift-domain-name-system"),
-            .product(name: "IP Address", package: "swift-ip-address"),
-            .product(name: "Certificates", package: "swift-certificate-verification"),
-            .product(name: "IO", package: "swift-io"),
-            .product(name: "Sockets", package: "swift-sockets"),
-            .product(name: "Span Raw Primitives", package: "swift-span-primitives"),
-        ]),
-        .target(name: "TLS Engine Interface", dependencies: ["TLS", .product(name: "Sockets", package: "swift-sockets")]),
+        .target(
+            name: "TLS",
+            dependencies: [
+                .product(name: "Domain Name System", package: "swift-domain-name-system"),
+                .product(name: "IP Address", package: "swift-ip-address"),
+                .product(name: "Certificates", package: "swift-certificate-verification"),
+                .product(name: "IO", package: "swift-io"),
+                .product(name: "Sockets", package: "swift-sockets"),
+                .product(name: "Span Raw Primitives", package: "swift-span-primitives"),
+            ]
+        ),
+        .target(
+            name: "TLS Engine Interface",
+            dependencies: ["TLS", .product(name: "Sockets", package: "swift-sockets")]
+        ),
         .target(name: "TLS Apple Engine", dependencies: ["TLS", "TLS Engine Interface"]),
         .target(name: "TLS OpenSSL Engine", dependencies: ["TLS", "TLS Engine Interface"]),
         .target(name: "TLS SChannel Engine", dependencies: ["TLS", "TLS Engine Interface"]),
-        .testTarget(name: "TLS Contract Tests", dependencies: ["TLS", "TLS Apple Engine", "TLS OpenSSL Engine", "TLS SChannel Engine"]),
+        .testTarget(
+            name: "TLS Contract Tests",
+            dependencies: ["TLS", "TLS Apple Engine", "TLS OpenSSL Engine", "TLS SChannel Engine"]
+        ),
     ],
     swiftLanguageModes: [.v6]
 )
 
 for target in package.targets where ![.system, .binary, .plugin, .macro].contains(target.type) {
-    target.swiftSettings = (target.swiftSettings ?? []) + [
-        .strictMemorySafety(),
-        .enableUpcomingFeature("ExistentialAny"),
-        .enableUpcomingFeature("InternalImportsByDefault"),
-        .enableUpcomingFeature("MemberImportVisibility"),
-        .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
-        .enableExperimentalFeature("LifetimeDependence"),
-        .enableExperimentalFeature("Lifetimes"),
-        .enableExperimentalFeature("SuppressedAssociatedTypes"),
-        .enableUpcomingFeature("InferIsolatedConformances"),
-    ]
+    target.swiftSettings =
+        (target.swiftSettings ?? []) + [
+            .strictMemorySafety(),
+            .enableUpcomingFeature("ExistentialAny"),
+            .enableUpcomingFeature("InternalImportsByDefault"),
+            .enableUpcomingFeature("MemberImportVisibility"),
+            .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+            .enableExperimentalFeature("LifetimeDependence"),
+            .enableExperimentalFeature("Lifetimes"),
+            .enableExperimentalFeature("SuppressedAssociatedTypes"),
+            .enableUpcomingFeature("InferIsolatedConformances"),
+        ]
 }
