@@ -2,13 +2,12 @@ public import Sockets
 public import TLS
 
 extension TLS {
-    /// TLS engine integration namespace; concrete engines are leaf products.
+
     public enum Engine {}
 }
 
 extension TLS.Engine {
-    /// An injected engine adapter that consumes a socket byte connection and yields an
-    /// authenticated session.
+
     public struct Witness: Sendable {
         public let handshake:
             @Sendable (
@@ -24,7 +23,6 @@ extension TLS.Engine {
             self.handshake = handshake
         }
 
-        /// Handshakes, then authenticates the certificate peer for the configured DNS hostname.
         public func wrap(
             socket: consuming Sockets.TCP.Connection,
             configuration: TLS.Configuration

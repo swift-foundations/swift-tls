@@ -1,6 +1,5 @@
 extension TLS {
-    // SAFETY: The injected operations own their synchronization and remain valid only until close.
-    /// An authenticated encrypted byte session for HTTP and PostgreSQL transports.
+
     public final class Session: @unchecked Sendable {
         private let readOperation: @Sendable (Int) async throws(TLS.Failure) -> [UInt8]
         private let writeOperation: @Sendable ([UInt8]) async throws(TLS.Failure) -> Void
@@ -16,19 +15,16 @@ extension TLS {
             self.closeOperation = close
         }
 
-        /// Reads decrypted bytes, returning an empty array at end of stream.
         public func read(maximum: Int) async throws(TLS.Failure) -> [UInt8] {
             guard !Task.isCancelled else { throw .cancelled }
             return try await readOperation(maximum)
         }
 
-        /// Writes plaintext bytes through the authenticated TLS record layer.
         public func write(_ bytes: [UInt8]) async throws(TLS.Failure) {
             guard !Task.isCancelled else { throw .cancelled }
             try await writeOperation(bytes)
         }
 
-        /// Closes the encrypted session and its underlying byte connection.
         public func close() async {
             await closeOperation()
         }
